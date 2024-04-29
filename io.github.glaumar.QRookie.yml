@@ -46,5 +46,5 @@ modules:
     buildsystem: cmake-ninja
     sources:
       - type: archive
-        url: https://github.com/glaumar/QRookie/archive/refs/tags/v0.2.2.tar.gz
-        sha256: c169a67015829ee805fea7aa6644f16362aa4c1a898cdee55f93dd5b1c3e982a
+        url: https://github.com/glaumar/QRookie/archive/refs/tags/v0.2.3.tar.gz
+        sha256: 3897c54e2a14cc6c9b221a502e56ea3ae04da9d611a21422cd806fcde9834d5b
