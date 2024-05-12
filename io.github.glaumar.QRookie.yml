@@ -45,6 +45,6 @@ modules:
   - name: qrookie
     buildsystem: cmake-ninja
     sources:
-      - type: archive
-        url: https://github.com/glaumar/QRookie/archive/refs/tags/v0.2.3.tar.gz
-        sha256: 3897c54e2a14cc6c9b221a502e56ea3ae04da9d611a21422cd806fcde9834d5b
+      - type: git
+        url: https://github.com/glaumar/QRookie.git
+        tag: v0.2.4.1
