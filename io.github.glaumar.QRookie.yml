@@ -2,7 +2,9 @@ app-id: io.github.glaumar.QRookie
 runtime: org.kde.Platform
 runtime-version: "6.6"
 sdk: org.kde.Sdk
-command: qrookie
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk21
+command: QRookie
 finish-args:
   - --socket=wayland
   - --socket=fallback-x11
@@ -10,6 +12,7 @@ finish-args:
   - --device=all
   - --share=network
   - --persist=.android
+  - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
 cleanup:
   - "*.a"
   - /include
@@ -20,20 +23,59 @@ modules:
       - cd CPP/7zip/Bundles/Alone
       - make
       - cd ../../../../
-      - install -pDm 0755 bin/7za -t "$FLATPAK_DEST/bin/"
+      - install -pDm 0755 bin/7za -t "/app/bin/"
     sources:
       - type: archive
         url: https://github.com/p7zip-project/p7zip/archive/refs/tags/v17.05.tar.gz
         sha256: d2788f892571058c08d27095c22154579dfefb807ebe357d145ab2ddddefb1a6
 
+  - name: openjdk
+    buildsystem: simple
+    build-commands:
+      - /usr/lib/sdk/openjdk21/install.sh
+
   - name: android-tools
     buildsystem: simple
     build-commands:
-      - install -pDm 0755 adb -t "$FLATPAK_DEST/bin/"
+      - install -pDm 0755 adb -t "/app/bin/"
     sources:
       - type: archive
         url: https://dl.google.com/android/repository/platform-tools_r34.0.0-linux.zip
         sha256: 8137c2834dea05cb64c1a8bc041ea00fcd43e3a8a29429ad4f25b8ee51efebf6
+
+  - name: android-apktool
+    buildsystem: simple
+    build-commands:
+      - install -Dm0644 apktool_2.9.3.jar "/app/share/android-apktool/apktool.jar"
+      - tar xf apktool-install-linux-r04-brut1.tar.bz2
+      - sed -i 's/libdir=.*progdir/libdir="\/app\/share\/'android-apktool'/' apktool
+      - install -pDm 0755 apktool -t "/app/bin/"
+    sources:
+      - type: file
+        url: https://github.com/iBotPeaches/Apktool/releases/download/v2.9.3/apktool_2.9.3.jar
+        sha256: 7956eb04194300ce0d0a84ad18771eebc94b89fb8d1ddcce8ea4c056818646f4
+      - type: file
+        url: http://connortumbleson.com/apktool/googlecode/apktool-install-linux-r04-brut1.tar.bz2
+        sha256: cffa5c0a46bab9c66da02cc5db651c3a8321bee98580815e44c802d62a696dfa
+
+  - name: android-sdk-build-tools
+    buildsystem: simple
+    build-options:
+      env:
+        target: "/opt/android-sdk/build-tools/android-14"
+    build-commands:
+      # https://aur.archlinux.org/cgit/aur.git/tree/PKGBUILD?h=android-sdk-build-tools
+      - mkdir -p "/app/$target"
+      - cp -r * "/app/$target"
+      - chmod +Xr -R "/app/$target"
+
+      # Add symlinks to binaries to app/bin/
+      - mkdir -p "/app/bin/"
+      - find . -maxdepth 1 -type f -executable -printf "%f\n" | xargs -n 1 -I _ ln -s "/app/$target/_" "/app/bin/_"
+    sources:
+      - type: archive
+        url: https://dl.google.com/android/repository/build-tools_r34-linux.zip
+        sha256: e858c4b60069d0431051b225d384413b1643e1289b00a4825aed347f25bd510f
 
   - name: qcoro
     buildsystem: cmake-ninja
@@ -47,4 +89,4 @@ modules:
     sources:
       - type: git
         url: https://github.com/glaumar/QRookie.git
-        tag: v0.2.4.1
+        tag: v0.3.1
